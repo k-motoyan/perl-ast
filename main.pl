@@ -8,6 +8,42 @@ use Compiler::Lexer;
 use Compiler::Parser;
 use Compiler::Parser::AST::Renderer;
 
+use constant {
+    CLASS             => "Class",
+    USED_NAME         => "UsedName",
+    LOCAL_VAR         => "LocalVar",
+    GLOBAL_VAR        => "GlobalVar",
+    LOCAL_ARRAY_VAR   => "LocalArrayVar",
+    GLOBAL_ARRAY_VAR  => "GlobalArrayVar",
+    LOCAL_ARRAY_VAR   => "LocalHashVar",
+    GLOBAL_ARRAY_VAR  => "GlobalHashVar",
+    FUNCTION          => "Function",
+    BUILT_IN_FUNCTION => "BuiltinFunc",
+    RETURN            => "Return",
+    INT               => "Int",
+    STRING            => "String",
+    ASSIGN            => "Assign",
+    POINTER           => "Pointer",
+    LEFT_PARENTHESIS  => "LeftParenthesis",
+    LEFT_BRACE        => "LeftBrace",
+    KEY               => "Key",
+    METHOD            => "Method",
+    REG_LIST          => "RegList",
+    REG_EXP           => "RegExp",
+};
+
+# local $struct = {
+#     Name            => "class name",
+#     Uses            => ["using modules"],
+#     LocalVars       => ["local variables"],
+#     Functions       => [$function_structs],
+# }
+
+# local $function_struct = {
+#     Type  => "function type: 0 => pure, 1 => instance, 2 => static",
+#     Exprs => ["function expires"],
+# }
+
 my $target_dir = $ARGV[0];
 for my $filename ( glob $target_dir . "/*.pm" ) {
     open(my $fh, "<", $filename) or die("Cannot open $filename: $!");
@@ -23,6 +59,13 @@ for my $filename ( glob $target_dir . "/*.pm" ) {
 sub print_name {
     my ( $node, $depth ) = @_;
 
+    my $name = $node->token->name;
+    my $data = $node->data;
+
+    print "  " foreach ( 1..$depth );
+    print BOLD, CYAN, "$name: $data", RESET;
+    print "\n";
+
     foreach ( @{$node->branches} ) {
         my $next_node = $node->{$_};
 
@@ -30,11 +73,6 @@ sub print_name {
             print_name( $_, $depth ) foreach ( @{$next_node} );
         }
         else {
-            my $name = $next_node->token->name;
-            my $data = $next_node->data;
-            print "  " foreach ( 1..$depth );
-            print BOLD, CYAN, "$name: $data", RESET;
-            print "\n";
             print_name( $next_node, $depth+1 );
         }
 

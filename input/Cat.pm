@@ -3,7 +3,9 @@ package Cat;
 use utf8;
 use strict;
 use warnings;
-use base qw/ Animal /;
+
+use base qw( Animal );
+use Flayable;
 
 sub legs {
     my $self = shift;
